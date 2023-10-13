@@ -1,33 +1,51 @@
-# Project
+# Test Code Coverage running within App Service WebJob
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+## Problem
 
-As the maintainer of this project, please make a few updates:
+Run (Test) Code Coverage from within Azure DevOps Pipeline in order to run the Acceptance Automated Tests on Azure App Service - WebJob.
+Alternatively the tests could be run on the hosted (or self-hosted) agent but running them on the App Service - WebJob is closer to the production environment (e.g. WebJob process may have different run behavior, environmental variables, etc) 
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
 
-## Contributing
+## Out of scope
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+The document doesn't cover DevOps tool Continuous Delivery pipeline (e.g. Azure DevOps Pipelines) for deployment, test run and test code coverage collection from within the DevOps tool. Only approach to run the code coverage collection from within the App Service WebJob is coevered.
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+## Solution Options
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+### Option 1 - Run the job with parameters
 
-## Trademarks
+When WebJob is packaged with run.cmd, this command becomes the main entry point. The run.cmd can start a dotnet app by providing parameters or by wrapping the execution with dotnet dotnet-coverage collect command.
+The dotnet dotnet-coverage collect produces output and save it within the App Service temporary files "local" (e.g. C:\local\Temp\jobs\triggered\TestCodeCoverageConsoleApp\kfeo0l33.lvo)
+If enabled, the files can be accessed via FTP protocol as described here https://github.com/projectkudu/kudu/wiki/Accessing-files-via-ftp
+Otherwise, the file can be copied by using command in the run.cmd and saved to one of the folder of the shared file storage system as described here https://github.com/projectkudu/kudu/wiki/Understanding-the-Azure-App-Service-file-system. Such shared file can be accessed by using Azure Storage REST API or Storage File Explorer tool.
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+Following run.cmd installs the dotnet-coverage tool from nuget.org and runs test console app to collect the coverage
+
+```
+dotnet
+dotnet new tool-manifest
+dotnet tool install --local dotnet-coverage
+dotnet dotnet-coverage collect .\TestCodeCoverageConsoleApp.exe
+```
+
+Log file for WebJob executed with dotnet-coverage tool
+
+![Alt text](Resources/image02.jpg)
+
+App Service interactive console,  invocation of dotnet tool install and look into the WebJob execution temp folder 
+
+![Alt text](Resources/image01.jpg)
+
+dotnet-coverage collection output for the test console app
+
+![Alt text](Resources/image03.jpg)
+
+### Other options
+
+Only approach for using dotnet native code coverage tools is described here. There are obviously many code coverage tools available and approach for code coverage collection when using these tools may be different.
+
+
+## References
+
+- https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-coverage
+- https://github.com/projectkudu/kudu/wiki/Understanding-the-Azure-App-Service-file-system
