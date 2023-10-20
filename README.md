@@ -8,7 +8,7 @@ Alternatively the tests could be run on the hosted (or self-hosted) agent but ru
 
 ## Out of scope
 
-The document doesn't cover DevOps tool Continuous Delivery pipeline (e.g. Azure DevOps Pipelines) for deployment, test run and test code coverage collection from within the DevOps tool. Only approach to run the code coverage collection from within the App Service WebJob is coevered.
+The document doesn't cover DevOps tool Continuous Delivery pipeline (e.g. Azure DevOps Pipelines) for deployment, test run and test code coverage collection from within the DevOps tool. Only approach to run the code coverage collection from within the App Service WebJob is covered.
 
 ## Solution Options
 
